@@ -61,11 +61,9 @@ export function Output(props) {
 }
 
 export function isClosed(str) {
-  const len = str.length;
   let count = 0;
   
-  for (let i = 0; i < len; i++) {
-    const chr = str[i];
+  for (let chr of str) {
     if (chr === '^') {
       count ++;
     }

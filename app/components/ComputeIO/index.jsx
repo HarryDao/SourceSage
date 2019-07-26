@@ -60,45 +60,31 @@ export function Output(props) {
   );
 }
 
-export function isClosed(str, checks = ['^$']) {
-  const { opens, closes } = checks.reduce(({opens, closes}, str) => {
-    const [open, close] = str.split('');
-    opens[open] = 0;
-    closes[close] = open;
-
-    return { opens, closes };
-  }, { opens: {}, closes: {} });
+export function isClosed(str) {
+  const openings = ['^', '[', '('];
+  const closings = ['$', ']', ')'];
+  const keepers = [];
 
   for (let chr of str) {
-    let open = null;
-    let next = null;
+    const openIndex = openings.indexOf(chr);
+    const closeIndex = closings.indexOf(chr);
 
-    if (opens.hasOwnProperty(chr)) {
-      open = chr;
-      next = opens[open] + 1;
+    if (openIndex > -1) {
+      keepers.unshift(chr);
     }
 
-    if (closes[chr]) {
-      open = closes[chr];
-      next = opens[open] - 1;
-    }
-
-    if (next !== null) {
-      if (next < 0) return false;
-      opens[open] = next;
+    if (closeIndex > -1) {
+      if (openings[closeIndex] !== keepers[0]) return false;
+      keepers.shift();
     }
   }
 
-  for (let open in opens) {
-    if (opens[open] !== 0) return false;
-  }
-
-  return true;
+  return !keepers.length;
 }
 
 export class ComputeIO extends React.Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {input: '', output: ''}
     this.onInputChange = this.onInputChange.bind(this);
     this.onButtonClick = this.onButtonClick.bind(this);

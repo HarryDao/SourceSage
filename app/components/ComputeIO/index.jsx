@@ -60,23 +60,40 @@ export function Output(props) {
   );
 }
 
-export function isClosed(str) {
-  let count = 0;
-  
+export function isClosed(str, checks = ['^$']) {
+  const { opens, closes } = checks.reduce(({opens, closes}, str) => {
+    const [open, close] = str.split('');
+    opens[open] = 0;
+    closes[close] = open;
+
+    return { opens, closes };
+  }, { opens: {}, closes: {} });
+
   for (let chr of str) {
-    if (chr === '^') {
-      count ++;
-    }
-    if (chr === '$') {
-      count --;
+    let open = null;
+    let next = null;
+
+    if (opens.hasOwnProperty(chr)) {
+      open = chr;
+      next = opens[open] + 1;
     }
 
-    if (count < 0) {
-      return false;
+    if (closes[chr]) {
+      open = closes[chr];
+      next = opens[open] - 1;
+    }
+
+    if (next !== null) {
+      if (next < 0) return false;
+      opens[open] = next;
     }
   }
 
-  return count === 0;
+  for (let open in opens) {
+    if (opens[open] !== 0) return false;
+  }
+
+  return true;
 }
 
 export class ComputeIO extends React.Component {
